@@ -11,5 +11,7 @@ stdenvNoCC.mkDerivation {
 
 	installPhase = lib.concatStringsSep "\n" [
 		"mkdir $out"
+		"cp hastus-schedule-decoder.html $out/"
+		"cp hastus-schedule-decoder.html $out/index.html"
 	];
 }
