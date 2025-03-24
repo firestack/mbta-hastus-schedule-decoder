@@ -1,5 +1,5 @@
 {
-  description = "Flake utils demo";
+  description = "MBTA HASTUS Schedule Decoder";
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
