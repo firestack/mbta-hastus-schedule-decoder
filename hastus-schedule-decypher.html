@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>HASTUS Schedule Decypher</title>
+
+	<style>
+		:root {
+			font-family: system-ui, sans-serif;
+			font-weight: normal;
+			color-scheme: light dark;
+		}
+
+		:root {
+			--accent: rgb(255, 199, 44);
+		}
+
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--accent: oklch(34.57% 0.1655 86.55);
+			}
+		}
+
+		.alternate-t-body {
+			/* Using multiple `tbody`'s due to usage of rowspan */
+			tbody:nth-child(odd) {
+				background-color: var(--accent);
+			}
+		}
+
+		.display {
+			display: flex;
+			flex-flow: row wrap;
+			align-items: flex-start;
+
+			details:not([open]) {
+				flex-basis: 100%;
+			}
+
+			.current-data, dl {
+				flex: 0 0 auto;
+			}
+
+			.table-data, table {
+				flex: 1 0 auto;
+			}
+		}
+
+		.table-data {
+			table {
+				overflow-x: auto;
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<label for="schedule-id">Schedule ID</label>
+	<input type="text" name="schedule-id" id="schedule-id" autocomplete="schedule-id">
+
+	<div class="display">
+		<details open class="current-data">
+			<summary>Current Item Details</summary>
+			<dl>
+				<dt>Schedule Type</dt>
+				<dd>
+					<output id="out-schedule-type">N/A</output>
+				</dd>
+				<dt>Schedule Mode</dt>
+				<dd>
+					<output id="out-schedule-mode">N/A</output>
+				</dd>
+				<dt>Garage</dt>
+				<dt>Yard</dt>
+				<dd>
+					<output id="out-schedule-garage">N/A</output>
+				</dd>
+				<dt>Rating Quarter</dt>
+				<dd>
+					<output id="out-schedule-rating-quarter">N/A</output>
+				</dd>
+				<dt>Last digit of year</dt>
+				<dd>
+					<output id="out-schedule-year-digit">N/A</output>
+				</dd>
+				<dt>Description Code</dt>
+				<dd>
+					<output id="out-schedule-description-code">N/A</output>
+				</dd>
+				<dt>Schedule Typicality</dt>
+				<dd>
+					<output id="out-schedule-typicality">N/A</output>
+				</dd>
+			</dl>
+		</details>
+
+		<details open class="table-data">
+			<summary></summary>
+			<table id="table-output" class="alternate-t-body">
+				<thead>
+					<tr>
+						<th>Input Value</th>
+						<th>Schedule Type</th>
+						<th>Schedule Mode</th>
+						<th>Garage or Yard</th>
+						<th>Rating Quarter</th>
+						<th>Last Digit of Year</th>
+						<th>Description Code</th>
+						<th>Schedule Typicality</th>
+					</tr>
+				</thead>
+			</table>
+		</details>
+	</div>
+</body>
+<script>
+const unknown = undefined
+
+/** Definition List UI Element references */
+const scheduleElements = /** @type {const} */ ({
+	type:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-type")),
+	mode:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-mode")),
+	garage:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-garage")),
+	rating_quarter:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-rating-quarter")),
+	year_digit:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-year-digit")),
+	description_code:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-description-code")),
+	typicality:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-typicality")),
+})
+
+/** Table UI Element reference */
+const tableOutput = document.getElementById("table-output")
+
+/** Schedule ID Input Element reference */
+const inputElement = /** @type {HTMLInputElement} */ (document.getElementById("schedule-id"))
+inputElement.addEventListener("input", (ev) => {
+	/** @type {string} */
+	const value = ev.target.value
+	updateDisplay(value)
+})
+
+updateDisplay(inputElement.value)
+
+//#region Functions
+/**
+ * Pulls out component parts of a HASTUS Schedule ID
+ * @param {string} value
+ */
+function parseHastusScheduleId(value) {
+	if (value.length < 8) { return undefined }
+	value = value.slice(0, 8)
+
+	const [
+		type,
+		mode,
+		garage,
+		rating_quarter,
+		year_digit,
+		description_code,
+		typicality
+	] = [
+		value.slice(0, 1),
+		value.slice(1, 2),
+		value.slice(2, 3),
+		value.slice(3, 4),
+		value.slice(4, 5),
+		value.slice(5, 7),
+		value.slice(7, 8),
+	]
+
+	return /** @type {const} */ ({
+		value,
+		type,
+		mode,
+		garage,
+		rating_quarter,
+		year_digit,
+		description_code,
+		typicality
+	})
+}
+
+//#region Update Functions
+/**
+ * Updates the DOM elements with a value parsed from {@linkcode value}
+ * @param {string} value
+ */
+function updateDisplay(value) {
+	const fieldValues = parseHastusScheduleId(value)
+	if (!fieldValues) { return }
+	const mappedValues = lookupScheduleValues(fieldValues)
+
+	updateDefinitionList(mappedValues)
+	appendTableElement(fieldValues, mappedValues)
+}
+
+/** @param {MappedScheduleIdValues} mappedValues */
+function updateDefinitionList(mappedValues) {
+	scheduleElements.type.value = mappedValues.type
+	scheduleElements.mode.value = mappedValues.mode
+	scheduleElements.garage.value = mappedValues.garage
+	scheduleElements.rating_quarter.value = mappedValues.rating_quarter
+	scheduleElements.year_digit.value = mappedValues.year_digit
+	scheduleElements.description_code.value = mappedValues.description_code
+	scheduleElements.typicality.value = mappedValues.typicality
+}
+
+/**
+ * @param {ScheduleIdFields} fieldValues
+ * @param {MappedScheduleIdValues} mappedValues
+ */
+function appendTableElement(fieldValues, mappedValues) {
+	const rowGroup = document.createElement("th")
+	rowGroup.rowSpan = 2
+	rowGroup.scope = "rowgroup"
+	rowGroup.append(h("code", fieldValues.value))
+
+	const tbody = h("tbody",
+		h("tr",
+			rowGroup,
+			h("td", h("code", fieldValues.type)),
+			h("td", h("code", fieldValues.mode)),
+			h("td", h("code", fieldValues.garage)),
+			h("td", h("code", fieldValues.rating_quarter)),
+			h("td", h("code", fieldValues.year_digit)),
+			h("td", h("code", fieldValues.description_code)),
+			h("td", h("code", fieldValues.typicality)),
+		),
+		h("tr",
+			h("td", mappedValues.type),
+			h("td", mappedValues.mode),
+			h("td", mappedValues.garage),
+			h("td", mappedValues.rating_quarter),
+			h("td", mappedValues.year_digit),
+			h("td", mappedValues.description_code),
+			h("td", mappedValues.typicality),
+		)
+	)
+
+	tableOutput.prepend(tbody)
+}
+//#endregion Update Functions
+
+//#region Lookup Functions
+// Functions related to mapping a HASTUS short "code" or value to a longer more
+// meaningful value
+
+/**
+ * @typedef {NonNullable<ReturnType<typeof parseHastusScheduleId>>} ScheduleIdFields
+ * @typedef {ReturnType<typeof lookupScheduleValues>} MappedScheduleIdValues
+ */
+
+/** @param {ScheduleIdFields} */
+function lookupScheduleValues({
+	type,
+	mode,
+	garage,
+	rating_quarter,
+	year_digit,
+	description_code,
+	typicality
+}) {
+	return /** @type {const} */ ({
+		type: lookupScheduleType(type) ?? "Unknown",
+		mode: lookupMode(mode) ?? "Unknown",
+		garage: lookupGarage(garage) ?? "Unknown",
+		rating_quarter: lookupRatingQuarter(rating_quarter),
+		year_digit: lookupYearDigit(year_digit),
+		description_code: lookupDescriptionCode(description_code) ?? "Unknown",
+		typicality: lookupTypicality(typicality) ?? "Unknown",
+	})
+}
+
+/** @param {string} v */
+function lookupScheduleType(v) {
+	switch (v) {
+		case "a": return "Crew"
+		default: return unknown
+	}
+}
+
+/** @param {string} v */
+function lookupMode(v) {
+	switch (v) {
+		case "b": return "Bus"
+		default: return unknown
+	}
+}
+/** @param {string} v */
+function lookupGarage(v) {
+	switch (v) {
+		default: return unknown
+	}
+}
+
+/** @param {string} v */
+function lookupRatingQuarter(v) {
+	switch (v) {
+		case "1": return "Winter"
+		case "2": return "Spring"
+		case "3": return "Summer"
+		case "4": return "Fall"
+		default: return unknown
+	}
+}
+
+/** @param {string} v */
+function lookupYearDigit(v) {
+	const year = new Date().getFullYear()
+	return (year - (year % 10) + parseInt(v)) || unknown
+}
+
+/** @param {string} v */
+function lookupDescriptionCode(v) {
+	switch (v) {
+		case "01": return "Normal Schedule"
+		case "ns": return "No School"
+		case "hl": return "Holiday"
+		default: return unknown
+	}
+}
+
+/** @param {string} v */
+function lookupTypicality(v) {
+	switch (v) {
+		case "1": return "Weekdays"
+		case "6": return "Saturdays"
+		case "7": return "Sundays"
+		default: return unknown
+	}
+}
+//#endregion Lookup Functions
+
+/**
+ * A "JSX-like" `h` function, aka `createElement` function.
+ * @param {keyof HTMLElementTagNameMap} node
+ * @param {undefined | (Node | string)[]} value
+ */
+function h(node, ...value) {
+	const element = document.createElement(node)
+	value && element.append(...value)
+
+	return element
+}
+//#endregion Functions
+</script>
+</html>
