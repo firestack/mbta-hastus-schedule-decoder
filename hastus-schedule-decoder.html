@@ -114,6 +114,30 @@
 		</details>
 	</div>
 </body>
+
+<template id="template::output-row">
+	<tbody>
+		<tr>
+			<th rowspan="2" scope="rowgroup"><code data-field-id="field-value"></code></th>
+
+			<td data-field-id="field-type"></td>
+			<td data-field-id="field-mode"></td>
+			<td data-field-id="field-garage"></td>
+			<td data-field-id="field-rating-quarter"></td>
+			<td data-field-id="field-year-digit"></td>
+			<td data-field-id="field-typicality"></td>
+		</tr>
+		<tr>
+			<td data-field-id="mapped-type"></td>
+			<td data-field-id="mapped-mode"></td>
+			<td data-field-id="mapped-garage"></td>
+			<td data-field-id="mapped-rating-quarter"></td>
+			<td data-field-id="mapped-year-digit"></td>
+			<td data-field-id="mapped-typicality"></td>
+		</tr>
+	</tbody>
+</template>
+
 <script>
 const unknown = undefined
 
@@ -198,7 +222,9 @@ function updateDisplay(value) {
 	const mappedValues = lookupScheduleValues(fieldValues)
 
 	updateDefinitionList(mappedValues)
-	appendTableElement(fieldValues, mappedValues)
+
+	const tableRow = createTableElementFromTemplate(fieldValues, mappedValues)
+	tableRow && tableOutput.append(tableRow)
 }
 
 /** @param {MappedScheduleIdValues} mappedValues */
@@ -245,6 +271,85 @@ function appendTableElement(fieldValues, mappedValues) {
 	)
 
 	tableOutput.prepend(tbody)
+}
+
+/**
+ * @param {ScheduleIdFields} fieldValues
+ * @param {MappedScheduleIdValues} mappedValues
+ */
+function createTableElementFromTemplate(fieldValues, mappedValues) {
+	const template =  document.getElementById("template::output-row")
+	if (!(template instanceof HTMLTemplateElement)) { return }
+
+	const row = template.content.cloneNode(true)
+	if (!(row instanceof DocumentFragment)) { return }
+
+	for(const element of row.querySelectorAll("[data-field-id]")) {
+		if(!(element instanceof HTMLElement)) { continue }
+
+		switch(element.dataset.fieldId) {
+			case "field-value": {
+				element.textContent = fieldValues.value
+				break
+			}
+			case "field-type": {
+				element.textContent = fieldValues.type
+				break
+			}
+			case "field-mode": {
+				element.textContent = fieldValues.mode
+				break
+			}
+			case "field-garage": {
+				element.textContent = fieldValues.garage
+				break
+			}
+			case "field-rating-quarter": {
+				element.textContent = fieldValues.rating_quarter
+				break
+			}
+			case "field-year-digit": {
+				element.textContent = fieldValues.year_digit
+				break
+			}
+			case "field-typicality": {
+				element.textContent = fieldValues.typicality
+				break
+			}
+
+			case "mapped-type": {
+				element.textContent = mappedValues.type
+				break
+			}
+			case "mapped-mode": {
+				element.textContent = mappedValues.mode
+				break
+			}
+			case "mapped-garage": {
+				element.textContent = mappedValues.garage
+				break
+			}
+			case "mapped-rating-quarter": {
+				element.textContent = mappedValues.rating_quarter
+				break
+			}
+			case "mapped-year-digit": {
+				element.textContent = mappedValues.year_digit
+				break
+			}
+			case "mapped-typicality": {
+				element.textContent = mappedValues.typicality
+				break
+			}
+
+			case undefined:
+			default: {
+				continue
+			}
+		}
+	}
+
+	return row
 }
 //#endregion Update Functions
 
