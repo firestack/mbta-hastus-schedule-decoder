@@ -125,6 +125,7 @@
 			<td data-field-id="field-garage"></td>
 			<td data-field-id="field-rating-quarter"></td>
 			<td data-field-id="field-year-digit"></td>
+			<td data-field-id="field-description-code"></td>
 			<td data-field-id="field-typicality"></td>
 		</tr>
 		<tr>
@@ -133,6 +134,7 @@
 			<td data-field-id="mapped-garage"></td>
 			<td data-field-id="mapped-rating-quarter"></td>
 			<td data-field-id="mapped-year-digit"></td>
+			<td data-field-id="mapped-description-code"></td>
 			<td data-field-id="mapped-typicality"></td>
 		</tr>
 	</tbody>
@@ -287,69 +289,59 @@ function createTableElementFromTemplate(fieldValues, mappedValues) {
 	for(const element of row.querySelectorAll("[data-field-id]")) {
 		if(!(element instanceof HTMLElement)) { continue }
 
-		switch(element.dataset.fieldId) {
-			case "field-value": {
-				element.textContent = fieldValues.value
-				break
-			}
-			case "field-type": {
-				element.textContent = fieldValues.type
-				break
-			}
-			case "field-mode": {
-				element.textContent = fieldValues.mode
-				break
-			}
-			case "field-garage": {
-				element.textContent = fieldValues.garage
-				break
-			}
-			case "field-rating-quarter": {
-				element.textContent = fieldValues.rating_quarter
-				break
-			}
-			case "field-year-digit": {
-				element.textContent = fieldValues.year_digit
-				break
-			}
-			case "field-typicality": {
-				element.textContent = fieldValues.typicality
-				break
-			}
+		const fieldId = element.dataset.fieldId
+		if(fieldId === undefined) { continue }
 
-			case "mapped-type": {
-				element.textContent = mappedValues.type
-				break
-			}
-			case "mapped-mode": {
-				element.textContent = mappedValues.mode
-				break
-			}
-			case "mapped-garage": {
-				element.textContent = mappedValues.garage
-				break
-			}
-			case "mapped-rating-quarter": {
-				element.textContent = mappedValues.rating_quarter
-				break
-			}
-			case "mapped-year-digit": {
-				element.textContent = mappedValues.year_digit
-				break
-			}
-			case "mapped-typicality": {
-				element.textContent = mappedValues.typicality
-				break
-			}
+		const value = getValueForFieldId(fieldId, fieldValues, mappedValues)
+		if(value === unknown) { continue }
 
-			case undefined:
-			default: {
-				continue
-			}
-		}
+		element.textContent = value.toString()
 	}
 
 	return row
+}
+
+/**
+ * @param {string} fieldId
+ * @param {ScheduleIdFields} fieldValues
+ * @param {MappedScheduleIdValues} mappedValues
+ */
+function getValueForFieldId(fieldId, fieldValues, mappedValues) {
+	switch(fieldId) {
+		case "field-value":
+			{ return fieldValues.value }
+		case "field-type":
+			{ return fieldValues.type }
+		case "field-mode":
+			{ return fieldValues.mode }
+		case "field-garage":
+			{ return fieldValues.garage }
+		case "field-rating-quarter":
+			{ return fieldValues.rating_quarter }
+		case "field-year-digit":
+			{ return fieldValues.year_digit }
+		case "field-description-code":
+			{ return fieldValues.description_code }
+		case "field-typicality":
+			{ return fieldValues.typicality }
+
+		case "mapped-type":
+			{ return mappedValues.type }
+		case "mapped-mode":
+			{ return mappedValues.mode }
+		case "mapped-garage":
+			{ return mappedValues.garage }
+		case "mapped-rating-quarter":
+			{ return mappedValues.rating_quarter }
+		case "mapped-year-digit":
+			{ return mappedValues.year_digit }
+		case "mapped-description-code":
+			{ return mappedValues.description_code }
+		case "mapped-typicality":
+			{ return mappedValues.typicality }
+	}
+
+	return unknown
 }
 //#endregion Update Functions
 
