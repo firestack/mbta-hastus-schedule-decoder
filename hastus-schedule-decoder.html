@@ -115,6 +115,15 @@
 	</div>
 </body>
 
+<!--
+Template for `#table-output` "rows"
+
+The template uses `data-field-id` attributes to identify the nodes where data
+should be inserted.
+
+This uses `data-` attributes instead of say the `id` attribute so that the HTML
+contract that `id`'s are unique is not broken accidentally.
+-->
 <template id="template::output-row">
 	<tbody>
 		<tr>
