@@ -244,41 +244,6 @@ function updateDefinitionList(mappedValues) {
  * @param {ScheduleIdFields} fieldValues
  * @param {MappedScheduleIdValues} mappedValues
  */
-function appendTableElement(fieldValues, mappedValues) {
-	const rowGroup = document.createElement("th")
-	rowGroup.rowSpan = 2
-	rowGroup.scope = "rowgroup"
-	rowGroup.append(h("code", fieldValues.value))
-
-	const tbody = h("tbody",
-		h("tr",
-			rowGroup,
-			h("td", h("code", fieldValues.type)),
-			h("td", h("code", fieldValues.mode)),
-			h("td", h("code", fieldValues.garage)),
-			h("td", h("code", fieldValues.rating_quarter)),
-			h("td", h("code", fieldValues.year_digit)),
-			h("td", h("code", fieldValues.description_code)),
-			h("td", h("code", fieldValues.typicality)),
-		),
-		h("tr",
-			h("td", mappedValues.type),
-			h("td", mappedValues.mode),
-			h("td", mappedValues.garage),
-			h("td", mappedValues.rating_quarter),
-			h("td", mappedValues.year_digit),
-			h("td", mappedValues.description_code),
-			h("td", mappedValues.typicality),
-		)
-	)
-
-	tableOutput.prepend(tbody)
-}
-
-/**
- * @param {ScheduleIdFields} fieldValues
- * @param {MappedScheduleIdValues} mappedValues
- */
 function createTableElementFromTemplate(fieldValues, mappedValues) {
 	const template =  document.getElementById("template::output-row")
 	if (!(template instanceof HTMLTemplateElement)) { return }
@@ -434,18 +399,6 @@ function lookupTypicality(v) {
 	}
 }
 //#endregion Lookup Functions
-
-/**
- * A "JSX-like" `h` function, aka `createElement` function.
- * @param {keyof HTMLElementTagNameMap} node
- * @param {undefined | (Node | string)[]} value
- */
-function h(node, ...value) {
-	const element = document.createElement(node)
-	value && element.append(...value)
-
-	return element
-}
 //#endregion Functions
 </script>
 </html>
