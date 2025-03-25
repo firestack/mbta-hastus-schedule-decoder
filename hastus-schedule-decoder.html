@@ -114,6 +114,32 @@
 		</details>
 	</div>
 </body>
+
+<template id="template::output-row">
+	<tbody>
+		<tr>
+			<th rowspan="2" scope="rowgroup"><code data-field-id="field-value"></code></th>
+
+			<td data-field-id="field-type"></td>
+			<td data-field-id="field-mode"></td>
+			<td data-field-id="field-garage"></td>
+			<td data-field-id="field-rating-quarter"></td>
+			<td data-field-id="field-year-digit"></td>
+			<td data-field-id="field-description-code"></td>
+			<td data-field-id="field-typicality"></td>
+		</tr>
+		<tr>
+			<td data-field-id="mapped-type"></td>
+			<td data-field-id="mapped-mode"></td>
+			<td data-field-id="mapped-garage"></td>
+			<td data-field-id="mapped-rating-quarter"></td>
+			<td data-field-id="mapped-year-digit"></td>
+			<td data-field-id="mapped-description-code"></td>
+			<td data-field-id="mapped-typicality"></td>
+		</tr>
+	</tbody>
+</template>
+
 <script>
 const unknown = undefined
 
@@ -198,7 +224,9 @@ function updateDisplay(value) {
 	const mappedValues = lookupScheduleValues(fieldValues)
 
 	updateDefinitionList(mappedValues)
-	appendTableElement(fieldValues, mappedValues)
+
+	const tableRow = createTableElementFromTemplate(fieldValues, mappedValues)
+	tableRow && tableOutput.append(tableRow)
 }
 
 /** @param {MappedScheduleIdValues} mappedValues */
@@ -216,35 +244,69 @@ function updateDefinitionList(mappedValues) {
  * @param {ScheduleIdFields} fieldValues
  * @param {MappedScheduleIdValues} mappedValues
  */
-function appendTableElement(fieldValues, mappedValues) {
-	const rowGroup = document.createElement("th")
-	rowGroup.rowSpan = 2
-	rowGroup.scope = "rowgroup"
-	rowGroup.append(h("code", fieldValues.value))
+function createTableElementFromTemplate(fieldValues, mappedValues) {
+	const template =  document.getElementById("template::output-row")
+	if (!(template instanceof HTMLTemplateElement)) { return }
 
-	const tbody = h("tbody",
-		h("tr",
-			rowGroup,
-			h("td", h("code", fieldValues.type)),
-			h("td", h("code", fieldValues.mode)),
-			h("td", h("code", fieldValues.garage)),
-			h("td", h("code", fieldValues.rating_quarter)),
-			h("td", h("code", fieldValues.year_digit)),
-			h("td", h("code", fieldValues.description_code)),
-			h("td", h("code", fieldValues.typicality)),
-		),
-		h("tr",
-			h("td", mappedValues.type),
-			h("td", mappedValues.mode),
-			h("td", mappedValues.garage),
-			h("td", mappedValues.rating_quarter),
-			h("td", mappedValues.year_digit),
-			h("td", mappedValues.description_code),
-			h("td", mappedValues.typicality),
-		)
-	)
+	const row = template.content.cloneNode(true)
+	if (!(row instanceof DocumentFragment)) { return }
 
-	tableOutput.prepend(tbody)
+	for(const element of row.querySelectorAll("[data-field-id]")) {
+		if(!(element instanceof HTMLElement)) { continue }
+
+		const fieldId = element.dataset.fieldId
+		if(fieldId === undefined) { continue }
+
+		const value = getValueForFieldId(fieldId, fieldValues, mappedValues)
+		if(value === unknown) { continue }
+
+		element.textContent = value.toString()
+	}
+
+	return row
+}
+
+/**
+ * @param {string} fieldId
+ * @param {ScheduleIdFields} fieldValues
+ * @param {MappedScheduleIdValues} mappedValues
+ */
+function getValueForFieldId(fieldId, fieldValues, mappedValues) {
+	switch(fieldId) {
+		case "field-value":
+			{ return fieldValues.value }
+		case "field-type":
+			{ return fieldValues.type }
+		case "field-mode":
+			{ return fieldValues.mode }
+		case "field-garage":
+			{ return fieldValues.garage }
+		case "field-rating-quarter":
+			{ return fieldValues.rating_quarter }
+		case "field-year-digit":
+			{ return fieldValues.year_digit }
+		case "field-description-code":
+			{ return fieldValues.description_code }
+		case "field-typicality":
+			{ return fieldValues.typicality }
+
+		case "mapped-type":
+			{ return mappedValues.type }
+		case "mapped-mode":
+			{ return mappedValues.mode }
+		case "mapped-garage":
+			{ return mappedValues.garage }
+		case "mapped-rating-quarter":
+			{ return mappedValues.rating_quarter }
+		case "mapped-year-digit":
+			{ return mappedValues.year_digit }
+		case "mapped-description-code":
+			{ return mappedValues.description_code }
+		case "mapped-typicality":
+			{ return mappedValues.typicality }
+	}
+
+	return unknown
 }
 //#endregion Update Functions
 
@@ -337,18 +399,6 @@ function lookupTypicality(v) {
 	}
 }
 //#endregion Lookup Functions
-
-/**
- * A "JSX-like" `h` function, aka `createElement` function.
- * @param {keyof HTMLElementTagNameMap} node
- * @param {undefined | (Node | string)[]} value
- */
-function h(node, ...value) {
-	const element = document.createElement(node)
-	value && element.append(...value)
-
-	return element
-}
 //#endregion Functions
 </script>
 </html>
