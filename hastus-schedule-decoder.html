@@ -353,6 +353,7 @@ function lookupScheduleValues({
 function lookupScheduleType(v) {
 	switch (v) {
 		case "a": return "Crew"
+		case "h": return "Vehicle"
 		default: return unknown
 	}
 }
@@ -361,6 +362,9 @@ function lookupScheduleType(v) {
 function lookupMode(v) {
 	switch (v) {
 		case "b": return "Bus"
+		case "p": return "Contractor Operated Bus"
+		case "m": return "Heavy Rail Subway"
+		case "l": return "Light Rail Subway"
 		default: return unknown
 	}
 }
@@ -392,7 +396,7 @@ function lookupYearDigit(v) {
 function lookupDescriptionCode(v) {
 	switch (v) {
 		case "01": return "Normal Schedule"
-		case "ns": return "No School"
+		case "ns": return "Weekday; No School"
 		case "hl": return "Holiday"
 		default: return unknown
 	}
