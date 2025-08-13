@@ -446,10 +446,91 @@ function yearDigitFromString(v) {
 /** @param {string} v */
 function descriptionCodeFromString(v) {
 	switch (v) {
-		case "01": return "Normal Schedule"
-		case "ns": return "Weekday; No School"
-		case "hl": return "Holiday"
-		default: return unknown
+		// Typical Service
+		case "01":
+		case "02":
+		case "bk":
+		case "cl":
+		case "fr":
+		case "gx":
+		case "rd":
+		case "sa":
+		case "sw":
+		case "wk":
+			return "Normal Schedule"
+
+		case "ns":
+		case "nf":
+		case "nx":
+		case "nz":
+		case "sn":
+		case "pn":
+		case "sf":
+		case "nt":
+			return "No School"
+
+		case "hl":
+		case "j4":
+		case "th":
+		case "tp":
+		case "xm":
+		case "me":
+		case "ch":
+		case "pt":
+		case "pd":
+		case "ny":
+		case "sp":
+			// Typicality: Holiday
+			return "Holiday"
+
+		// Weather Based Service
+		case "we":
+		case "wt":
+		case "l4":
+		case "a4":
+		case "b4":
+		case "f4":
+		case "h4":
+		case "w4":
+		case "hp":
+		case "tn":
+		case "ts":
+			// Typicality: Weather
+			return "Reduced Service"
+
+		case "l3":
+		case "a3":
+		case "b3":
+		case "f3":
+		case "w3":
+		case "co":
+			// Typicality: Weather
+			return /** AND schedule_type == "1" */ "Reduced Service"
+
+		case "al":
+			// Typicality: Weather
+			return "Alternate Service"
+
+		case "wn":
+			// Typicality: Weather
+			return "Weekday Schedule (Reduced Service, No School)"
+
+
+		// Extra Service
+		case "fn":
+			// Typicality: Extra
+			return "New Year's Eve"
+
+
+		// Disruptions
+		case "3l":
+		case "ut":
+			// Typicality: Planned Disruption
+			return "Sumner Tunnel Closure"
+
+		default:
+			// Typicality: Planned Disruption|Fallback
+			return "Modified Service (or Unknown)"
 	}
 }
 
