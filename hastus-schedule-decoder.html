@@ -61,6 +61,8 @@
 		<label for="schedule-id">Schedule ID</label>
 		<input type="text" name="schedule-id" id="schedule-id" autocomplete="schedule-id">
 
+		<input type="text" name="schedule-id-list" id="schedule-id-list" hidden="hidden">
+
 		<input type="submit" hidden />
 	</form>
 
@@ -182,6 +184,24 @@ const tableOutput = document.getElementById("table-output")
 /** URL Params for Saved Searches */
 const urlParams = new URLSearchParams(window.location.search)
 
+/** Parsing previously added schedule ids on initial load */
+const previousInputs = /** @type {HTMLInputElement} */ (document.getElementById("schedule-id-list"))
+try {
+	// Ensure valid json
+	const parsedJson = JSON.parse(urlParams.get("schedule-id-list"))
+	previousInputs.value = JSON.stringify(parsedJson && Array.isArray(parsedJson) && parsedJson || [])
+} catch (error) {
+	previousInputs.value = JSON.stringify([])
+}
+for (const value of JSON.parse(previousInputs.value)) {
+	const fieldValues = parseHastusScheduleId(value)
+	if (!fieldValues) { continue }
+	const mappedValues = scheduleValuesFromString(fieldValues)
+
+	const tableRow = createTableElementFromTemplate(fieldValues, mappedValues)
+	tableRow && tableOutput.append(tableRow)
+}
+
 /** Schedule ID Input Element reference */
 const inputElement = /** @type {HTMLInputElement} */ (document.getElementById("schedule-id"))
 
@@ -193,6 +213,8 @@ inputElement.addEventListener("input", (ev) => {
 })
 
 updateDisplay(inputElement.value)
+
+
 
 //#region Functions
 /**
@@ -246,7 +268,25 @@ function updateDisplay(value) {
 	updateDefinitionList(mappedValues)
 
 	const tableRow = createTableElementFromTemplate(fieldValues, mappedValues)
-	tableRow && tableOutput.append(tableRow)
+	if (tableRow) {
+		tableOutput.append(tableRow)
+		previousInputs.value = appendScheduleValue(previousInputs.value, value)
+	}
+}
+
+/**
+ * @param {string} acc
+ * @param {string} value
+ * @returns {string}
+ */
+function appendScheduleValue(acc, value) {
+	const maybe_arr = JSON.parse(acc)
+	// Check that it's an array, but the values should be "reasonable"
+	/** @type {any[]} */
+	const valuesArray = (maybe_arr && Array.isArray(maybe_arr) && maybe_arr) || []
+
+	valuesArray.push(value)
+	return JSON.stringify(valuesArray)
 }
 
 /** @param {MappedScheduleIdValues} mappedValues */
