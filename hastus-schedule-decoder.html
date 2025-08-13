@@ -55,9 +55,15 @@
 		}
 	</style>
 </head>
+
 <body>
-	<label for="schedule-id">Schedule ID</label>
-	<input type="text" name="schedule-id" id="schedule-id" autocomplete="schedule-id">
+	<form target="_self" method="get">
+		<label for="schedule-id">Schedule ID</label>
+		<input type="text" name="schedule-id" id="schedule-id" autocomplete="schedule-id">
+
+		<input type="submit" hidden />
+	</form>
+
 
 	<div class="display">
 		<details open class="current-data">
@@ -173,8 +179,13 @@ const scheduleElements = /** @type {const} */ ({
 /** Table UI Element reference */
 const tableOutput = document.getElementById("table-output")
 
+/** URL Params for Saved Searches */
+const urlParams = new URLSearchParams(window.location.search)
+
 /** Schedule ID Input Element reference */
 const inputElement = /** @type {HTMLInputElement} */ (document.getElementById("schedule-id"))
+
+inputElement.value = urlParams.get(inputElement.id)
 inputElement.addEventListener("input", (ev) => {
 	/** @type {string} */
 	const value = ev.target.value
