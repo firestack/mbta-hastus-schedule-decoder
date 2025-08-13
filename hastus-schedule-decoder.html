@@ -96,9 +96,9 @@
 				<dd>
 					<output id="out-schedule-description-code">N/A</output>
 				</dd>
-				<dt>Schedule Typicality</dt>
+				<dt>Service Type</dt>
 				<dd>
-					<output id="out-schedule-typicality">N/A</output>
+					<output id="out-service-type">N/A</output>
 				</dd>
 			</dl>
 		</details>
@@ -115,7 +115,7 @@
 						<th>Rating Quarter</th>
 						<th>Last Digit of Year</th>
 						<th>Description Code</th>
-						<th>Schedule Typicality</th>
+						<th>Service Type</th>
 					</tr>
 				</thead>
 			</table>
@@ -143,7 +143,7 @@ contract that `id`'s are unique is not broken accidentally.
 			<td><code data-field-id="field-rating-quarter"></code></td>
 			<td><code data-field-id="field-year-digit"></code></td>
 			<td><code data-field-id="field-description-code"></code></td>
-			<td><code data-field-id="field-typicality"></code></td>
+			<td><code data-field-id="field-service-type"></code></td>
 		</tr>
 		<tr>
 			<td data-field-id="mapped-type"></td>
@@ -152,7 +152,7 @@ contract that `id`'s are unique is not broken accidentally.
 			<td data-field-id="mapped-rating-quarter"></td>
 			<td data-field-id="mapped-year-digit"></td>
 			<td data-field-id="mapped-description-code"></td>
-			<td data-field-id="mapped-typicality"></td>
+			<td data-field-id="mapped-service-type"></td>
 		</tr>
 	</tbody>
 </template>
@@ -174,8 +174,8 @@ const scheduleElements = /** @type {const} */ ({
 		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-year-digit")),
 	description_code:
 		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-description-code")),
-	typicality:
-		/** @type {HTMLOutputElement} */ (document.getElementById("out-schedule-typicality")),
+	service_type:
+		/** @type {HTMLOutputElement} */ (document.getElementById("out-service-type")),
 })
 
 /** Table UI Element reference */
@@ -232,7 +232,7 @@ function parseHastusScheduleId(value) {
 		rating_quarter,
 		year_digit,
 		description_code,
-		typicality
+		service_type
 	] = [
 		value.slice(0, 1),
 		value.slice(1, 2),
@@ -251,7 +251,7 @@ function parseHastusScheduleId(value) {
 		rating_quarter,
 		year_digit,
 		description_code,
-		typicality
+		service_type
 	})
 }
 
@@ -297,7 +297,7 @@ function updateDefinitionList(mappedValues) {
 	scheduleElements.rating_quarter.value = mappedValues.rating_quarter
 	scheduleElements.year_digit.value = mappedValues.year_digit
 	scheduleElements.description_code.value = mappedValues.description_code
-	scheduleElements.typicality.value = mappedValues.typicality
+	scheduleElements.service_type.value = mappedValues.service_type
 }
 
 /**
@@ -347,8 +347,8 @@ function getValueForFieldId(fieldId, fieldValues, mappedValues) {
 			{ return fieldValues.year_digit }
 		case "field-description-code":
 			{ return fieldValues.description_code }
-		case "field-typicality":
-			{ return fieldValues.typicality }
+		case "field-service-type":
+			{ return fieldValues.service_type }
 
 		case "mapped-type":
 			{ return mappedValues.type }
@@ -362,8 +362,8 @@ function getValueForFieldId(fieldId, fieldValues, mappedValues) {
 			{ return mappedValues.year_digit }
 		case "mapped-description-code":
 			{ return mappedValues.description_code }
-		case "mapped-typicality":
-			{ return mappedValues.typicality }
+		case "mapped-service-type":
+			{ return mappedValues.service_type }
 	}
 
 	return unknown
@@ -387,7 +387,7 @@ function scheduleValuesFromString({
 	rating_quarter,
 	year_digit,
 	description_code,
-	typicality
+	service_type
 }) {
 	return /** @type {const} */ ({
 		type: lookupScheduleType(type) ?? "Unknown",
@@ -396,7 +396,7 @@ function scheduleValuesFromString({
 		rating_quarter: ratingQuarterFromString(rating_quarter),
 		year_digit: yearDigitFromString(year_digit),
 		description_code: descriptionCodeFromString(description_code) ?? "Unknown",
-		typicality: typicalityFromString(typicality) ?? "Unknown",
+		service_type: serviceTypeFromString(service_type) ?? "Unknown",
 	})
 }
 
@@ -454,7 +454,7 @@ function descriptionCodeFromString(v) {
 }
 
 /** @param {string} v */
-function typicalityFromString(v) {
+function serviceTypeFromString(v) {
 	switch (v) {
 		case "1": return "Weekdays"
 		case "6": return "Saturdays"
